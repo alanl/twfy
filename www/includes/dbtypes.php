@@ -65,7 +65,7 @@ $hansardmajors = array(
 	),
 	101 => array(
 		'type'=>'debate',
-		'title'=>'Senate debates',
+		'title'=>'Lords debates',
 		'singular'=>'debate',
 		'plural'=>'debates',
 		'page'=>'lordsdebate',
@@ -140,22 +140,10 @@ $parties = array (
 	'Dem'   => 'Liberal Democrat',
 	'DU'    => 'Democratic Unionist',
 	'Ind'   => 'Independent',
-	'Ind Con'       => 'Independent Conservative',
-	'Ind Lab'       => 'Independent Labour',
-	'Ind UU'        => 'Independent Ulster Unionist',
-	'Lab'   => 'Labour',
-	'Lab/Co-op'     => 'Labour/Co-operative',
-	'LDem'  => 'Liberal Democrat',
-	'PC'    => 'Plaid Cymru',
-	'Res'   => 'Respect',
-	'SDLP'  => 'Social Democratic and Labour Party',
-	'SF'    => 'Sinn Fein',
-	'SNP'   => 'Scottish National Party',
 	'SPK'   => 'Speaker',
-	'UKU'   => 'United Kingdom Unionist',
+	'ALP'   => 'Australian Labor Party',
 	'UU'    => 'Ulster Unionist',
-	'XB'    => 'Crossbench',
-	'PRESIDENT' => 'President of the Senate'
+	'XB'    => 'Crossbench'
 );
 
 

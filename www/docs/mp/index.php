@@ -89,13 +89,10 @@ if (get_http_var('recent')) {
 
 /////////////////////////////////////////////////////////
 // CHECK SUBMITTED MEMBER (term of office) ID.
-
+// references to MLAs and MSPs removed
 if (get_http_var('c4')) $this_page = 'c4_mp';
 elseif (get_http_var('c4x')) $this_page = 'c4x_mp';
-elseif (get_http_var('peer')) $this_page = 'peer';
-elseif (get_http_var('royal')) $this_page = 'royal';
-elseif (get_http_var('mla')) $this_page = 'mla';
-elseif (get_http_var('msp')) $this_page = 'msp';
+elseif (get_http_var('senator')) $this_page = 'senator';
 else $this_page = 'mp';
 
 if (is_numeric(get_http_var('m'))) {
@@ -192,7 +189,7 @@ if (is_numeric(get_http_var('m'))) {
 } elseif ($name) {
 	$MEMBER = new MEMBER(array('name' => $name));
 	if (((($MEMBER->house_disp==1)
-	    || ($MEMBER->house_disp==2 && $this_page!='peer'))
+	    || ($MEMBER->house_disp==2)) //&& $this_page!='senator'))
 	    && ($MEMBER->valid || !is_array($MEMBER->person_id()))) || $redirect) {
 		member_redirect($MEMBER);
 	}
@@ -249,7 +246,7 @@ if (isset($MEMBER) && is_array($MEMBER->person_id())) {
 		if (!$MEMBER->current_member(1)) {
 			$subtitle .= ', former';
 		}
-		$subtitle .= ' MP, '.$MEMBER->constituency();
+		$subtitle .= ' MP, '.$MEMBER->electorate();
 	}
 	if ($MEMBER->house(3)) {
 		if (!$MEMBER->current_member(3)) {
@@ -327,7 +324,7 @@ if (isset($MEMBER) && is_array($MEMBER->person_id())) {
 
 	if ($MEMBER->house(1)) {
 		$lat = null; $lon = null;
-		$geometry = _api_getGeometry_name($MEMBER->constituency());
+		$geometry = _api_getGeometry_name($MEMBER->electorate());
 		if (isset($geometry['centre_lat'])) {
 			$lat = $geometry['centre_lat'];
 			$lon = $geometry['centre_lon'];

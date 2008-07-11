@@ -24,7 +24,7 @@ function twfy_debug ($header, $text="") {
 	
 		// Set which level shows which types of debug info.
 		$levels = array (
-			1 => array ('SKIN', 'THEUSER', 'TIME', 'SQLERROR', 'PAGE', 'TEMPLATE', 'SEARCH', 'ALERTS', 'MP'),
+			1 => array ('SKIN', 'THEUSER', 'TIME', 'SQLERROR', 'PAGE', 'TEMPLATE', 'SEARCH', 'ALERTS', 'MP', 'SENATOR'),
 			2 => array ('SQL', 'EMAIL', 'WIKIPEDIA', 'hansardlist', 'debatelist', 'wranslist', 'whalllist'),
 			3 => array ('SQLRESULT')
 			// Higher than this: 'DATA', etc.
@@ -833,32 +833,28 @@ function make_plural($word, $number)
         return $word;
     return $word . "s";
 }
-
-function make_member_url($name, $const = '', $house = 1) {
+# XXXQUEEN
+function make_member_url($name, $const = '', $house) {
 	$s = array(' ', '&amp;', '&ocirc;', '&ouml;', '&acirc;', '&iacute;', '&aacute;');
 	$r = array('_', 'and',     'o',       'o',    'a',       'i',        'a' );
 	$name = preg_replace('#^the #', '', strtolower($name));
 	$out = urlencode(str_replace($s, $r, $name));
-	if ($const && ($house==1 || $house == 2))
+	if ($const && ($house==1 || $house ==2))
 		$out .= '/' . urlencode(str_replace($s, $r, strtolower($const)));
 	elseif ($house==0)
 		$out = 'elizabeth_the_second';
 	return $out;
 }
 
+# alanl: function adapted for australia 
+# XXXQUEEN
 function member_full_name($house, $title, $first_name, $last_name, $constituency) {
 	$s = 'ERROR';
-	if ($house == 1 || $house == 2 || $house == 3 || $house == 4) {
+	if ($house == 1 || $house == 2) {
 		$s = $first_name . ' ' . $last_name;
 		if ($title) {
 			$s = $title . ' ' . $s;
 		}
-//	} elseif ($house == 2) {
-//		$s = '';
-//		if (!$last_name) $s = 'the ';
-//		$s .= $title;
-//		if ($last_name) $s .= ' ' . $last_name;
-//		if ($constituency) $s .= ' of ' . $constituency;
 	} elseif ($house == 0) { # Queen
 		$s = "$first_name $last_name";
 	}

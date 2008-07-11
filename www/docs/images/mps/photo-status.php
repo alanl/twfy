@@ -6,9 +6,9 @@ $DATA->set_page_metadata($this_page, 'heading', 'MPs photo status on OpenAustral
 $PAGE->page_start();
 $PAGE->stripe_start();
 $db = new ParlDB;
-$query = 'SELECT person_id, first_name, last_name, constituency, party
+$query = 'SELECT person_id, first_name, last_name, electorate, party
 	FROM member
-	WHERE house=1 AND left_house = (SELECT MAX(left_house) FROM member) ';
+	WHERE house in (1,2) AND left_house = (SELECT MAX(left_house) FROM member) ';
 $q = $db->query($query . "ORDER BY last_name, first_name");
 $out = array('both'=>'', 'small'=>'', 'none'=>'');
 for ($i=0; $i<$q->rows(); $i++) {
@@ -19,7 +19,7 @@ for ($i=0; $i<$q->rows(); $i++) {
 	} elseif ($sz == 'S') {
 		$out['small'] .= $q->field($i, 'first_name') . ' ' . $q->field($i, 'last_name') . ', ';
 	} else {
-		$out['none'] .= '<li>' . $q->field($i, 'first_name') . ' ' . $q->field($i, 'last_name') . ' (' . $q->field($i, 'party') . ')' . ', ' . $q->field($i, 'constituency');
+		$out['none'] .= '<li>' . $q->field($i, 'first_name') . ' ' . $q->field($i, 'last_name') . ' (' . $q->field($i, 'party') . ')' . ', ' . $q->field($i, 'electorate');
 	}
 }
 print '<h3>Missing completely</h3> <ul>';

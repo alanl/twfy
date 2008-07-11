@@ -11,7 +11,7 @@ $data = array (
 		'first_name'	=> 'Fred',
 		'last_name'		=> 'Bloggs,
 		'person_id'		=> 23,
-		'constituency'	=> 'Here',
+		'electorate'	=> 'Here',
 		'party'			=> 'Them'
 	)
 );
@@ -37,18 +37,12 @@ $th_party = '<a href="' . $URL->generate() . '">Party</a>';
 if ($order == 'party')
 	$th_party = 'Party';
 
-$URL->insert(array('o'=>'c'));
-$th_state = '<a href="' . $URL->generate() . '">State</a>';
-if ($order == 'constituency')
-	$th_state = 'State';
-
 ?>
 				<table border="0" cellpadding="4" cellspacing="0" width="90%" class="people">
 				<thead>
 				<th><?php echo $th_name; ?></th>
 				<th><?php echo $th_party; ?></th>
-				<th><?php echo $th_state; ?></th>
-				<th>Positions</th>
+				<th>Ministerialship</th>
 <?php if ($order == 'debates') { ?>
 				<th>Debates spoken in the last year</th>
 <?php } ?>
@@ -60,7 +54,7 @@ $URL = new URL(str_replace('s', '', $this_page));
 $style = '2';
 
 foreach ($data['data'] as $pid => $peer) {
-	render_peers_row($peer, $style, $order, $URL);
+	render_senators_row($peer, $style, $order, $URL);
 }
 ?>
 				</tbody>
@@ -72,13 +66,13 @@ function manymins($p, $d) {
 	return prettify_office($p, $d);
 }
 
-function render_peers_row($peer, &$style, $order, $URL) {
+function render_senators_row($peer, &$style, $order, $URL) {
 	global $parties;
 
 	// Stripes	
 	$style = $style == '1' ? '2' : '1';
 
-	$name = member_full_name(2, $peer['title'], $peer['first_name'], $peer['last_name'], $peer['constituency']);
+	$name = member_full_name(1, $peer['title'], $peer['first_name'], $peer['last_name'], $peer['electorate']);
 	if (array_key_exists($peer['party'], $parties))
 		$party = $parties[$peer['party']];
 	else
@@ -87,9 +81,8 @@ function render_peers_row($peer, &$style, $order, $URL) {
 #	$MPURL->insert(array('pid'=>$peer['person_id']));
 	?>
 				<tr>
-				<td class="row-<?php echo $style; ?>"><a href="<?php echo $URL->generate().make_member_url($name, $peer['constituency'], 2); ?>"><?php echo ucfirst($name); ?></a></td>
+				<td class="row-<?php echo $style; ?>"><a href="<?php echo $URL->generate().make_member_url($name, null, 2); ?>"><?php echo ucfirst($name); ?></a></td>
 				<td class="row-<?php echo $style; ?>"><?php echo $party; ?></td>
-				<td class="row-<?php echo $style; ?>"><?php echo $peer['constituency']?></td>
 				<td class="row-<?php echo $style; ?>"><?php
 	if (is_array($peer['dept'])) print join('<br>', array_map('manymins', $peer['pos'], $peer['dept']));
 	elseif ($peer['dept']) print prettify_office($peer['pos'], $peer['dept']);

@@ -1,7 +1,7 @@
 <?php
 
 /*
-Used on the 'All MPs' page to produce the list of MPs.
+Used on the 'All Senators' page to produce the list of senators.
 
 $data = array (
 	'info' => array (
@@ -19,7 +19,7 @@ $data = array (
 
 global $this_page;
 
-twfy_debug("TEMPLATE", "people_mps.php");
+twfy_debug("TEMPLATE", "people_senators.php");
 
 $order = $data['info']['order'];
 
@@ -42,7 +42,7 @@ $th_name .= ' name';
 $URL->insert(array('o'=>'p'));
 $th_party = '<a href="' . $URL->generate() . '">Party</a>';
 $URL->insert(array('o'=>'c'));
-$th_electorate = '<a href="' . $URL->generate() . '">Electorate</a>';
+$th_electorate = '<a href="' . $URL->generate() . '">State</a>';
 
 if ($order == 'party') {
 	$th_party = 'Party';
@@ -70,7 +70,7 @@ if ($order == 'party') {
 				<tbody>
 <?php
 
-$MPURL = new URL(str_replace('s', '', $this_page));
+$MPURL = new URL('senator');
 $style = '2';
 
 $opik = array();

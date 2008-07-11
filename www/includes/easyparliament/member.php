@@ -10,7 +10,7 @@ class MEMBER {
 	var $first_name;
 	var $title;
 	var $last_name;
-	var $constituency; 
+	var $electorate; 
 	var $party;
 	var $other_parties;
 	var $houses = array();
@@ -26,9 +26,7 @@ class MEMBER {
 	var $houses_pretty = array(
 		0 => 'Royal Family',
 		1 => 'House of Commons',
-		2 => 'House of Lords',
-		3 => 'Northern Ireland Assembly',
-		4 => 'Scottish Parliament',
+		2 => 'House of Lords'
 	);
 	
 	// Mapping member table reasons to text.
@@ -55,11 +53,11 @@ class MEMBER {
 		// $args is a hash like one of:
 		// member_id 		=> 237
 		// person_id 		=> 345
-		// constituency 	=> 'Braintree'
+		// electorate 	=> 'Braintree'
 		// postcode			=> 'e9 6dw'
 
-		// If just a constituency we currently just get the current member for
-		// that constituency.
+		// If just a electorate we currently just get the current member for
+		// that electorate.
 		
 		global $PAGE, $this_page;
 		
@@ -68,10 +66,10 @@ class MEMBER {
 		if (isset($args['member_id']) && is_numeric($args['member_id'])) {
 			$person_id = $this->member_id_to_person_id($args['member_id']);
 		} elseif (isset($args['name'])) {
-			$con = isset($args['constituency']) ? $args['constituency'] : '';
+			$con = isset($args['electorate']) ? $args['electorate'] : '';
 			$person_id = $this->name_to_person_id($args['name'], $con);
-		} elseif (isset($args['constituency'])) {
-			$person_id = $this->constituency_to_person_id($args['constituency']);
+		} elseif (isset($args['electorate'])) {
+			$person_id = $this->electorate_to_person_id($args['electorate']);
 		} elseif (isset($args['postcode'])) {
 			$person_id = $this->postcode_to_person_id($args['postcode']);
 		} elseif (isset($args['person_id']) && is_numeric($args['person_id'])) {
@@ -98,7 +96,7 @@ class MEMBER {
 		
 		// Get the data.
 		$q = $this->db->query("SELECT member_id, house, title,
-			first_name, last_name, constituency, party,
+			first_name, last_name, electorate, party,
 			entered_house, left_house, entered_reason, left_reason, person_id
 			FROM member
 			WHERE person_id = '" . mysql_escape_string($person_id) . "'
@@ -113,7 +111,7 @@ class MEMBER {
 		for ($row=0; $row<$q->rows(); $row++) {
 			$house          = $q->field($row, 'house');
 			if (!in_array($house, $this->houses)) $this->houses[] = $house;
-			$const          = $q->field($row, 'constituency');
+			$const          = $q->field($row, 'electorate');
 			$party		= $q->field($row, 'party');
 			$entered_house	= $q->field($row, 'entered_house');
 			$left_house	= $q->field($row, 'left_house');
@@ -138,19 +136,17 @@ class MEMBER {
 					'date' => $left_house,
 					'date_pretty' => $this->left_house_text($left_house),
 					'reason' => $this->left_reason_text($left_reason),
-					'constituency' => $const,
+					'electorate' => $const,
 					'party' => $this->party_text($party)
 				);
 			}
 
 			if ( $house==0 					# The Monarch
-			    || (!$this->house_disp && $house==4)	# MSPs and
-			    || (!$this->house_disp && $house==3)	# MLAs have lowest priority
 			    || ($this->house_disp!=2 && $house==2)	# Lords have highest priority
 			    || ((!$this->house_disp || $this->house_disp==3) && $house==1) # MPs have higher priority than MLAs
 			) {
 				$this->house_disp = $house;
-				$this->constituency = $const;
+				$this->electorate = $const;
 				$this->party = $party;
 
 				$this->member_id	= $q->field($row, 'member_id');
@@ -190,36 +186,36 @@ class MEMBER {
 	
 	function postcode_to_person_id ($postcode) {
 		twfy_debug ('MP', "postcode_to_person_id converting postcode to person");
-		$constituency = strtolower(postcode_to_constituency($postcode));
-		return $this->constituency_to_person_id($constituency);
+		$electorate = strtolower(postcode_to_electorate($postcode));
+		return $this->electorate_to_person_id($electorate);
 	}
 	
-	function constituency_to_person_id ($constituency) {
+	function electorate_to_person_id ($electorate) {
 		global $PAGE;
-		if ($constituency == '') {
-			$PAGE->error_message("Sorry, no constituency was found.");
+		if ($electorate == '') {
+			$PAGE->error_message("Sorry, no electorate was found.");
 			return false;
 		}
 
-		if ($constituency == 'Orkney ') {
-			$constituency = 'Orkney &amp; Shetland';
+		if ($electorate == 'Orkney ') {
+			$electorate = 'Orkney &amp; Shetland';
 		}
 
-		$normalised = normalise_constituency_name($constituency);
-		if ($normalised) $constituency = $normalised;
+		$normalised = normalise_electorate_name($electorate);
+		if ($normalised) $electorate = $normalised;
 
 	        $q = $this->db->query("SELECT person_id FROM member 
-					WHERE constituency = '" . mysql_escape_string($constituency) . "' 
+					WHERE electorate = '" . mysql_escape_string($electorate) . "' 
 					AND left_reason = 'still_in_office'");
 
 		if ($q->rows > 0) {
 			return $q->field(0, 'person_id');
 		} else {
-			$q = $this->db->query("SELECT person_id FROM member WHERE constituency = '".mysql_escape_string($constituency)."' ORDER BY left_house DESC LIMIT 1");
+			$q = $this->db->query("SELECT person_id FROM member WHERE electorate = '".mysql_escape_string($electorate)."' ORDER BY left_house DESC LIMIT 1");
 			if ($q->rows > 0) {
 				return $q->field(0, 'person_id');
 			} else {
-				$PAGE->error_message("Sorry, there is no current member for the '" . htmlentities(html_entity_decode($constituency)) . "' constituency.");
+				$PAGE->error_message("Sorry, there is no current member for the '" . htmlentities(html_entity_decode($electorate)) . "' electorate.");
 				return false;
 			}
 		}
@@ -231,26 +227,34 @@ class MEMBER {
 			$PAGE->error_message('Sorry, no name was found.');
 			return false;
 		}
+					twfy_debug('MP', "name = " . $name);
 		# Matthew made this change, but I don't know why.  It broke
 		# Iain Duncan Smith, so I've put it back.  FAI 2005-03-14
 		#		$success = preg_match('#^(.*? .*?) (.*?)$#', $name, $m);
-		$q = "SELECT DISTINCT person_id,constituency FROM member WHERE ";
-		#if ($this_page=='peer') {
-		#	$success = preg_match('#^(.*?) (.*?) of (.*?)$#', $name, $m);
-		#	if (!$success)
-		#		$success = preg_match('#^(.*?)() of (.*?)$#', $name, $m);
-		#	if (!$success)
-		#		$success = preg_match('#^(.*?) (.*?)()$#', $name, $m);
-		#	if (!$success) {
-		#		$PAGE->error_message('Sorry, that name was not recognised.');
-		#		return false;
-		#	}
-		#	$title = mysql_escape_string($m[1]);
-		#	$last_name = mysql_escape_string($m[2]);
-		#	$const = $m[3];
-		#	$q .= "house = 2 AND title = '$title' AND last_name='$last_name'";
-		#}
-		if ($this_page=='msp') {
+		$q = "SELECT DISTINCT person_id, electorate FROM member WHERE ";
+		if ($this_page=='senator') {
+			$success = preg_match('#^(.*?) (.*?) (.*?)$#', $name, $m);
+			if (!$success)
+				$success = preg_match('#^(.*?)() (.*)$#', $name, $m);
+			if (!$success) {
+				$PAGE->error_message('Sorry, that name was not recognised.');
+				return false;
+			}
+			$first_name = $m[1];
+			$middle_name = $m[2];
+			$last_name = $m[3];
+			twfy_debug('SENATOR', "first_name = " . $first_name);
+			# if ($title) $q .= 'title = \'' . mysql_escape_string($title) . '\' AND ';
+			$q .= "house =2 AND ((first_name='".mysql_escape_string($first_name." ".$middle_name)."' AND last_name='".mysql_escape_string($last_name)."') OR ".
+			"(first_name='".mysql_escape_string($first_name)."' AND last_name='".mysql_escape_string($middle_name." ".$last_name)."'))";
+			if ($const) {
+				$normalised = normalise_electorate_name($const);
+				if ($normalised && strtolower($normalised) != strtolower($const)) {
+					$this->canonical = false;
+					$const = $normalised;
+				}
+			}
+		} elseif ($this_page=='msp') {
 			$success = preg_match('#^(.*?) (.*?) (.*?)$#', $name, $m);
 			if (!$success)
 				$success = preg_match('#^(.*?)() (.*)$#', $name, $m);
@@ -278,7 +282,7 @@ class MEMBER {
 			$q .= "house = 3 AND (";
 			$q .= "(first_name='$first_name $middle_name' AND last_name='$last_name')";
 			$q .= " or (first_name='$first_name' AND last_name='$middle_name $last_name') )";
-		} elseif (strstr($this_page, 'mp') || $this_page == 'peer') {
+		} elseif (strstr($this_page, 'mp')) {
 			$success = preg_match('#^(.*?) (.*?) (.*?)$#', $name, $m);
 			if (!$success)
 				$success = preg_match('#^(.*?)() (.*)$#', $name, $m);
@@ -289,15 +293,11 @@ class MEMBER {
 			$first_name = $m[1];
 			$middle_name = $m[2];
 			$last_name = $m[3];
-			if (strstr($this_page, 'mp'))
-				$house = 1;
-			else
-				$house = 2;
 			# if ($title) $q .= 'title = \'' . mysql_escape_string($title) . '\' AND ';
-			$q .= "house = ".$house." AND ((first_name='".mysql_escape_string($first_name." ".$middle_name)."' AND last_name='".mysql_escape_string($last_name)."') OR ".
+			$q .= "house =1 AND ((first_name='".mysql_escape_string($first_name." ".$middle_name)."' AND last_name='".mysql_escape_string($last_name)."') OR ".
 			"(first_name='".mysql_escape_string($first_name)."' AND last_name='".mysql_escape_string($middle_name." ".$last_name)."'))";
 			if ($const) {
-				$normalised = normalise_constituency_name($const);
+				$normalised = normalise_electorate_name($const);
 				if ($normalised && strtolower($normalised) != strtolower($const)) {
 					$this->canonical = false;
 					$const = $normalised;
@@ -308,7 +308,7 @@ class MEMBER {
 		}
 
 		if ($const || $this_page=='peer') {
-			$q .= ' AND constituency=\''.mysql_escape_string($const)."'";
+			$q .= ' AND electorate=\''.mysql_escape_string($const)."'";
 		}
 		$q .= ' ORDER BY left_house DESC';
 		$q = $this->db->query($q);
@@ -321,11 +321,11 @@ class MEMBER {
 				$pid = $q->field($i, 'person_id');
 				if (!in_array($pid, $person_ids)) {
 					$person_ids[] = $pid;
-					$consts[] = $q->field($i, 'constituency');
+					$consts[] = $q->field($i, 'electorate');
 				}
 			}
 			if (sizeof($person_ids) == 1) return $person_ids[0];
-			$this->constituency = $consts;
+			$this->electorate = $consts;
 			return $person_ids;
 		} elseif ($q->rows > 0) {
 			return $q->field(0, 'person_id');
@@ -343,8 +343,8 @@ class MEMBER {
 		global $THEUSER;
 		if (is_object($THEUSER) && $THEUSER->constituency_is_set() && $this->current_member(1)) {
 			twfy_debug ('MP', "set_users_mp converting postcode to person");
-			$constituency = $THEUSER->constituency();
-			if ($constituency == $this->constituency()) {
+			$electorate = $THEUSER->electorate();
+			if ($electorate == $this->electorate()) {
 				$this->the_users_mp = true;
 			}
 		}
@@ -394,13 +394,13 @@ class MEMBER {
 	    #	    	$this->extra_info[$q->field($row, 'data_key').'_joint'] = true;
         }
 
-        // Info specific to constituency (e.g. election results page on Guardian website)
+        // Info specific to electorate (e.g. election results page on Guardian website)
 	if ($this->house(1)) {
 
         $q = $this->db->query("SELECT	data_key,
                                 data_value
                         FROM 	consinfo
-                        WHERE	constituency = '" . mysql_escape_string($this->constituency) . "'
+                        WHERE	constituency = '" . mysql_escape_string($this->electorate) . "'
                         ");
         for ($row = 0; $row < $q->rows(); $row++)
         {
@@ -507,7 +507,7 @@ class MEMBER {
 		$title = $this->title;
 		if ($no_mp_title && $this->house_disp==1)
 			$title = '';
-		return member_full_name($this->house_disp, $title, $this->first_name, $this->last_name, $this->constituency);
+		return member_full_name($this->house_disp, $title, $this->first_name, $this->last_name, $this->electorate);
 	}
 	function houses() {
 		return $this->houses;
@@ -518,7 +518,7 @@ class MEMBER {
 	function house_text($house) {
 		return $this->houses_pretty[$house];
 	}
-	function constituency() 	{ return $this->constituency; }
+	function electorate() 	{ return $this->electorate; }
 	function party() 			{ return $this->party; }
 	function party_text($party = null) {
 		global $parties;
@@ -605,20 +605,17 @@ class MEMBER {
 
 	function the_users_mp()		{ return $this->the_users_mp; }
 
+#XXXQUEEN
 	function url($absolute = true) {
 		$house = $this->house_disp;
 		if ($house==1) {
 			$URL = new URL('mp');
 		} elseif ($house==2) {
-			$URL = new URL('peer');
-		} elseif ($house==3) {
-			$URL = new URL('mla');
-		} elseif ($house==4) {
-			$URL = new URL('msp');
+			$URL = new URL('senator');
 		} elseif ($house==0) {
 			$URL = new URL('royal');
 		}
-		$member_url = make_member_url($this->full_name(true), $this->constituency(), $house);
+		$member_url = make_member_url($this->full_name(true), $this->electorate(), $house);
 		if ($absolute)
 			return 'http://' . DOMAIN . $URL->generate('none') . $member_url;
 		else
@@ -631,7 +628,7 @@ class MEMBER {
 		$member = array (
 			'member_id' 		=> $this->member_id(),
 			'person_id'		=> $this->person_id(),
-			'constituency' 		=> $this->constituency(),
+			'electorate' 		=> $this->electorate(),
 			'party'			=> $this->party_text(),
 			'other_parties'		=> $this->other_parties,
 			'houses'		=> $this->houses(),
@@ -650,7 +647,7 @@ class MEMBER {
 		$previous_people = '';
 		$entered_house = $this->entered_house(1);
 		if (is_null($entered_house)) return '';
-		$q = $this->db->query('SELECT DISTINCT(person_id), first_name, last_name FROM member WHERE house=1 AND constituency = "'.$this->constituency() . '" AND person_id != ' . $this->person_id() . ' AND entered_house < "' . $entered_house['date'] . '"');
+		$q = $this->db->query('SELECT DISTINCT(person_id), first_name, last_name FROM member WHERE house=1 AND electorate = "'.$this->electorate() . '" AND person_id != ' . $this->person_id() . ' AND entered_house < "' . $entered_house['date'] . '"');
 		for ($r = 0; $r < $q->rows(); $r++) {
 			$pid = $q->field($r, 'person_id');
 			$name = $q->field($r, 'first_name') . ' ' . $q->field($r, 'last_name');
@@ -668,7 +665,7 @@ class MEMBER {
 		$future_people = '';
 		$entered_house = $this->entered_house(1);
 		if (is_null($entered_house)) return '';
-		$q = $this->db->query('SELECT DISTINCT(person_id), first_name, last_name FROM member WHERE house=1 AND constituency = "'.$this->constituency() . '" AND person_id != ' . $this->person_id() . ' AND entered_house > "' . $entered_house['date'] . '"');
+		$q = $this->db->query('SELECT DISTINCT(person_id), first_name, last_name FROM member WHERE house=1 AND electorate = "'.$this->electorate() . '" AND person_id != ' . $this->person_id() . ' AND entered_house > "' . $entered_house['date'] . '"');
 		if ($this->person_id() == 10218) return;
 		for ($r = 0; $r < $q->rows(); $r++) {
 			$pid = $q->field($r, 'person_id');

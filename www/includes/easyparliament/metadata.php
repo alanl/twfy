@@ -341,9 +341,9 @@ $this->page = array (
 	'hansard' => array (
 		'menu'			=> array (
 			'text'			=> 'Hansard',
-			'title'			=> "House of Representatives and Senate debates"
+			'title'			=> "House debates"
 		),
-		'title'			=> 'House of Representatives and Senate debates',
+		'title'			=> 'House of Representatives',
 		'track'			=> true,
 		'url'			=> 'hansard/'
 	),	
@@ -413,11 +413,11 @@ $this->page = array (
 	),			
 	'lordsdebatesfront' => array (
 		'menu'			=> array (
-			'text'			=> 'Senate Debates',
-			'title'			=> "Senate debates"
+			'text'			=> 'Lords Debates',
+			'title'			=> "House of Lords debates"
 		),
 		'parent'		=> 'hansard',
-		'title'			=> 'Senate debates',
+		'title'			=> 'House of Lords debates',
 		'track'			=> true,
 		'rss'			=> 'lords/lords.rss',
 		'url'			=> 'lords/'
@@ -428,51 +428,22 @@ $this->page = array (
 		'url'			=> 'lords/'
 	),
 
-	'peer' => array (
-		'title'			=> 'Peer',
+	'senator' => array (
+		'title'			=> 'Senator',
 		'track'			=> true,
-		'url'			=> 'peer/'
+		'url'			=> 'senator/'
 	),
-	'peers' => array (
+	'senators' => array (
 		 'menu'			=> array (
 			'text'			=> 'All Senators',
 			'title'			=> "List of all Senators"
 		),
 		'title'			=> 'All Senators',
 		'track'			=> true,
-		'url'			=> 'peers/'
+		'url'			=> 'senators/'
 	),
-
-	'mla' => array (
-		'title'			=> 'MLA',
-		'track'			=> true,
-		'url'			=> 'mla/'
-	),
-	'mlas' => array (
-		 'menu'			=> array (
-			'text'			=> 'All MLAs',
-			'title'			=> "List of all MLAs"
-		),
-		'title'			=> 'All MLAs',
-		'track'			=> true,
-		'url'			=> 'mlas/'
-	),
-
-	'msp' => array (
-		'title'			=> 'MSP',
-		'track'			=> true,
-		'url'			=> 'msp/'
-	),
-	'msps' => array (
-		 'menu'			=> array (
-			'text'			=> 'All MSPs',
-			'title'			=> "List of all MSPs"
-		),
-		'title'			=> 'All MSPs',
-		'track'			=> true,
-		'url'			=> 'msps/'
-	),
-
+# alanl: references to mla and msps removed
+	
 	/* Not 'Your MP', whose name is 'yourmp'... */
 	'mp' => array (
 		'title'			=> 'MP',
@@ -621,7 +592,7 @@ $this->page = array (
 		'url'			=> 'regmem/',
 		'parent'		=> 'regmem'
 	),
-	
+# XXXQUEEN	
 	'royal' => array (
 		'title'			=> 'Royal',
 		'url'			=> 'royal/'

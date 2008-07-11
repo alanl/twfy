@@ -10,12 +10,12 @@ function api_getMP_front() {
 <dl>
 <dt>postcode (optional)</dt>
 <dd>Fetch the MP for a particular postcode (either the current one, or the most recent one, depending upon the setting of the always_return variable.</dd>
-<dt>constituency (optional)</dt>
-<dd>The name of a constituency; we will try and work it out from whatever you give us. :)</dd>
+<dt>electorate (optional)</dt>
+<dd>The name of a electorate; we will try and work it out from whatever you give us. :)</dd>
 <dt>id (optional)</dt>
 <dd>If you know the person ID for the member you want (returned from getMPs or elsewhere), this will return data for that person. <!-- <em>Also returns select committee membership and ministerial positions, past and present.</em> --></dd>
 <dt>always_return (optional)</dt>
-<dd>For the postcode and constituency options, sets whether to always try and return an MP, even if the seat is currently vacant.</dd>
+<dd>For the postcode and electorate options, sets whether to always try and return an MP, even if the seat is currently vacant.</dd>
 <!-- 
 <dt>extra (optional)</dt>
 <dd>Returns extra data in one or more categories, separated by commas.</dd>
@@ -33,7 +33,7 @@ function api_getMP_front() {
 function _api_getMP_row($row) {
 	global $parties;
 	$row['full_name'] = member_full_name($row['house'], $row['title'], $row['first_name'],
-		$row['last_name'], $row['constituency']);
+		$row['last_name'], $row['electorate']);
 	if (isset($parties[$row['party']]))
 		$row['party'] = $parties[$row['party']];
 	list($image,$sz) = find_rep_image($row['person_id']);
@@ -74,11 +74,11 @@ function api_getMP_id($id) {
 function api_getMP_postcode($pc) {
 	$pc = preg_replace('#[^a-z0-9 ]#i', '', $pc);
 	if (is_postcode($pc)) {
-		$constituency = postcode_to_constituency($pc);
-		if ($constituency == 'CONNECTION_TIMED_OUT') {
+		$electorate = postcode_to_electorate($pc);
+		if ($electorate == 'CONNECTION_TIMED_OUT') {
 			api_error('Connection timed out');
-		} elseif ($constituency) {
-			$person = _api_getMP_constituency($constituency);
+		} elseif ($electorate) {
+			$person = _api_getMP_electorate($electorate);
 			$output = $person;
 			api_output($output, strtotime($output['lastupdate']));
 		} else {
@@ -89,39 +89,39 @@ function api_getMP_postcode($pc) {
 	}
 }
 
-function api_getMP_constituency($constituency) {
-	$person = _api_getMP_constituency($constituency);
+function api_getMP_electorate($electorate) {
+	$person = _api_getMP_electorate($electorate);
 	if ($person) {
 		$output = $person;
 		api_output($output, strtotime($output['lastupdate']));
 	} else {
-		api_error('Unknown constituency, or no MP for that constituency');
+		api_error('Unknown electorate, or no MP for that electorate');
 	}
 }
 
-# Very similary to MEMBER's constituency_to_person_id
+# Very similary to MEMBER's electorate_to_person_id
 # Should all be abstracted properly :-/
-function _api_getMP_constituency($constituency) {
+function _api_getMP_electorate($electorate) {
 	$db = new ParlDB;
 
-	if ($constituency == '')
+	if ($electorate == '')
 		return false;
 
-	if ($constituency == 'Orkney ')
-		$constituency = 'Orkney &amp; Shetland';
+	if ($electorate == 'Orkney ')
+		$electorate = 'Orkney &amp; Shetland';
 
-	$normalised = normalise_constituency_name($constituency);
-	if ($normalised) $constituency = $normalised;
+	$normalised = normalise_electorate_name($electorate);
+	if ($normalised) $electorate = $normalised;
 
 	$q = $db->query("SELECT * FROM member
-		WHERE constituency = '" . mysql_escape_string($constituency) . "'
+		WHERE electorate = '" . mysql_escape_string($electorate) . "'
 		AND left_reason = 'still_in_office' AND house=1");
 	if ($q->rows > 0)
 		return _api_getMP_row($q->row(0));
 
 	if (get_http_var('always_return')) {
 		$q = $db->query("SELECT * FROM member
-			WHERE house=1 AND constituency = '".mysql_escape_string($constituency)."'
+			WHERE house=1 AND electorate = '".mysql_escape_string($electorate)."'
 			ORDER BY left_house DESC LIMIT 1");
 		if ($q->rows > 0)
 			return _api_getMP_row($q->row(0));
