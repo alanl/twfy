@@ -76,15 +76,8 @@ if ($action{'regmem'}) {
 }
 
 if ($action{'links'}) {
-        $twig->parsefile($pwmembers . "wikipedia-mla.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "wikipedia-msp.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "wikipedia-commons.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "wikipedia-lords.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "diocese-bishops.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "edm-links.xml", ErrorContext => 2);
-        $twig->parsefile($pwmembers . "bbc-links.xml", ErrorContext => 2);
-        # TODO: Update Guardian links
-        $twig->parsefile($pwmembers . "guardian-links.xml", ErrorContext => 2);
+        $twig->parsefile($pwmembers . "wikipedia-mps.xml", ErrorContext => 2);
+        $twig->parsefile($pwmembers . "wikipedia-senators.xml", ErrorContext => 2);
         # TODO: Update websites (esp. with new MPs)
         $twig->parsefile($pwmembers . 'websites.xml', ErrorContext => 2);
         chdir $FindBin::Bin;
@@ -157,7 +150,7 @@ foreach my $mp_id (keys %$memberinfohash) {
 
 # Write to database - people
 foreach my $person_id (keys %$personinfohash) {
-        (my $person_id_num = $person_id) =~ s#uk.org.publicwhip/person/##;
+        (my $person_id_num = $person_id) =~ s#org.openaustralia/person/##;
         my $data = $personinfohash->{$person_id};
         foreach my $key (keys %$data) {
                 my $new_value = $data->{$key};
